@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AST</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; }
+  rect { fill: #e8f0fe; stroke: #4a6fd1; rx: 6; }
+  line { stroke: #888; }
+  text { font-size: 13px; text-anchor: middle; dominant-baseline: middle; }
+</style>
+</head>
+<body>
+<h2>Abstract Syntax Tree</h2>
+<svg id="svg"></svg>
+<script>
+AST_DATA
+const W = 90, H = 30, GAPX = 15, GAPY = 70;
+let x = 0;
+
+function layout(n, depth) {
+  n.y = depth * GAPY + 20;
+  if (n.children.length === 0) { n.x = x; x += W + GAPX; }
+  else {
+    n.children.forEach(c => layout(c, depth + 1));
+    n.x = (n.children[0].x + n.children[n.children.length - 1].x) / 2;
+  }
+}
+
+function draw(n, svg) {
+  n.children.forEach(c => {
+    svg.innerHTML += `<line x1="${n.x + W/2}" y1="${n.y + H}" x2="${c.x + W/2}" y2="${c.y}"/>`;
+    draw(c, svg);
+  });
+  svg.innerHTML += `<rect x="${n.x}" y="${n.y}" width="${W}" height="${H}"/>
+                    <text x="${n.x + W/2}" y="${n.y + H/2}">${n.name}</text>`;
+}
+
+function maxDepth(n) { return 1 + Math.max(0, ...n.children.map(maxDepth)); }
+
+layout(data, 0);
+const svg = document.getElementById("svg");
+svg.setAttribute("width", x + 20);
+svg.setAttribute("height", maxDepth(data) * GAPY + 20);
+draw(data, svg);
+</script>
+</body>
+</html>
